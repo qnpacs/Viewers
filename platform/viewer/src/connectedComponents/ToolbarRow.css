@@ -1,17 +1,33 @@
 .ToolbarRow {
-    border-bottom: var(--ui-border-thickness) solid var(--ui-border-color);
-    flex: 0 0 auto;
-    height: var(--toolbar-height);
-    padding-left: 1rem;
-    padding-right: 1rem;
-    position: relative;
-    transition: height 300ms ease;
-    width: 100%;
-    display: flex;
-    align-items: center;
+  border-bottom: var(--ui-border-thickness) solid var(--ui-border-color);
+  flex: 0 0 auto;
+  height: var(--toolbar-height);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  position: relative;
+  transition: height 300ms ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 ToolbarRow.expanded {
-    height: calc(var(--toolbar-height) + var(--toolbar-drawer-height));
+  height: calc(var(--toolbar-height) + var(--toolbar-drawer-height));
 }
 
+@media only screen and (max-width: 768px) {
+  .ToolbarRow {
+    overflow-y: hidden;
+    overflow-x: scroll;
+    height: var(--toolbar-height-on-mobile);
+  }
+  .ToolbarRow .toolbar-button {
+    display: flex;
+    align-items: center;
+  }
+  .ToolbarRow .bottomLabel,
+  .ToolbarRow .toolbar-button-label,
+  .tooltip-toolbar-overlay .toolbar-button-label {
+    display: none;
+  }
+}
