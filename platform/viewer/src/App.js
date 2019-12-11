@@ -35,15 +35,35 @@ import WhiteLabellingContext from './context/WhiteLabellingContext';
 import UserManagerContext from './context/UserManagerContext';
 import AppContext from './context/AppContext';
 
+import OHIFVTKExtension from '@ohif/extension-vtk';
+import OHIFDicomHtmlExtension from '@ohif/extension-dicom-html';
+import OHIFDicomMicroscopyExtension from '@ohif/extension-dicom-microscopy';
+import OHIFDicomPDFExtension from '@ohif/extension-dicom-pdf';
+
+// Default Settings
+let config = {};
+if (window) {
+  config = window.config || {};
+  config.extensions = [
+    OHIFVTKExtension,
+    OHIFDicomHtmlExtension,
+    OHIFDicomMicroscopyExtension,
+    OHIFDicomPDFExtension,
+  ];
+  window.config = Object.assign({}, window.config, config);
+}
+
 // ~~~~ APP SETUP
 const commandsManagerConfig = {
   getAppState: () => store.getState(),
   getActiveContexts: () => getActiveContexts(store.getState()),
 };
 
+window.getActiveContexts = getActiveContexts(store.getState());
 const commandsManager = new CommandsManager(commandsManagerConfig);
 const hotkeysManager = new HotkeysManager(commandsManager);
 const extensionManager = new ExtensionManager({ commandsManager });
+
 // ~~~~ END APP SETUP
 
 // TODO[react] Use a provider when the whole tree is React

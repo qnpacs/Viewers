@@ -53,6 +53,15 @@ OHIF.viewer.functionList = {
     resetViewport: viewportUtils.resetViewport,
     invert: viewportUtils.invert
 };*/
+const isMobile = (function() {
+  if (
+    'ontouchstart' in window ||
+    (window.DocumentTouch && document instanceof DocumentTouch)
+  ) {
+    return true;
+  }
+  return false;
+})();
 
 class Viewer extends Component {
   static propTypes = {
@@ -87,7 +96,7 @@ class Viewer extends Component {
   }
 
   state = {
-    isLeftSidePanelOpen: true,
+    isLeftSidePanelOpen: !isMobile,
     isRightSidePanelOpen: false,
     selectedRightSidePanel: '',
     selectedLeftSidePanel: 'studies', // TODO: Don't hardcode this

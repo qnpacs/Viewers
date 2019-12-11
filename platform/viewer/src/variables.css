@@ -31,4 +31,7 @@
 
   /** z-Index **/
   --snackbar-zIndex: 10;
+
+  /* on mobile */
+  --toolbar-height-on-mobile: 48px;
 }
