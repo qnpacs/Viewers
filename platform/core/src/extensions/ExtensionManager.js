@@ -14,7 +14,7 @@ export default class ExtensionManager {
     });
   }
 
-  /**
+  /*
    * An array of extensions, or an array of arrays that contains extension
    * configuration pairs.
    *

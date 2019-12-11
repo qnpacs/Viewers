@@ -113,7 +113,8 @@ function StudyListRoute(props) {
       pageNumber,
       displaySize,
       server,
-    ]);
+    ]
+  );
 
   // TODO: Update Server
   // if (this.props.server !== prevProps.server) {
@@ -361,7 +362,7 @@ async function getStudyList(
 
     return {
       accessionNumber: study.accessionNumber, // "1"
-      modalities: study.modalities, // "SEG\\MR"  ​​
+      modalities: study.modalities, // "SEG\\MR"
       // numberOfStudyRelatedInstances: "3"
       // numberOfStudyRelatedSeries: "3"
       // patientBirthdate: undefined

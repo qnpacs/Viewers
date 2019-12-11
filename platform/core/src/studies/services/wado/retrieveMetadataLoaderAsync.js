@@ -70,9 +70,24 @@ export default class RetrieveMetadataLoaderAsync extends RetrieveMetadataLoader 
     const client = new api.DICOMwebClient({
       url: server.qidoRoot,
       headers: DICOMWeb.getAuthorizationHeader(server),
+      // wadoURL: server.wadoRoot,
+      // url: server.baseUrl,
+      // headers: DICOMWeb.getAuthorizationHeader(server),
+      // qidoURLPrefix: server.qidoURLPrefix,
+      // wadoURLPrefix: server.wadoURLPrefix,
     });
 
     this.client = client;
+
+    // var options = {
+    //   url: server.baseUrl,
+    //   headers: DICOMWeb.getAuthorizationHeader(server),
+    //   qidoURLPrefix: server.qidoRoot,
+    //   wadoURLPrefix: server.wadoRoot,
+    // };
+
+    // const client = new api.DICOMwebClient(options);
+    // this.client = client;
   }
 
   /**

@@ -26,7 +26,8 @@
       "autoFix": true
     }
   ],
-  "prettier.disableLanguages": ["html"],
-  "prettier.endOfLine": "lf",
+  "prettier.disableLanguages": [
+    "html"
+  ],
   "workbench.colorCustomizations": {}
 }

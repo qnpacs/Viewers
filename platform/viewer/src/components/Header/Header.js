@@ -4,7 +4,7 @@ import { withTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 
 import ConnectedUserPreferencesForm from '../../connectedComponents/ConnectedUserPreferencesForm';
-import { Dropdown, AboutContent, withModal } from '@ohif/ui';
+import { Dropdown, withModal } from '@ohif/ui';
 import OHIFLogo from '../OHIFLogo/OHIFLogo.js';
 import './Header.css';
 
@@ -43,15 +43,15 @@ class Header extends Component {
       modalContext: { show },
     } = this.props;
     this.options = [
-      {
-        title: t('About'),
-        icon: { name: 'info' },
-        onClick: () =>
-          show(AboutContent, {
-            title: t('OHIF Viewer - About'),
-            customClassName: 'AboutContent',
-          }),
-      },
+      // {
+      //   title: t('About'),
+      //   icon: { name: 'info' },
+      //   onClick: () =>
+      //     show(AboutContent, {
+      //       title: t('OHIF Viewer - About'),
+      //       customClassName: 'AboutContent',
+      //     }),
+      // },
       {
         title: 'Preferences ',
         icon: {
@@ -82,7 +82,8 @@ class Header extends Component {
     return (
       <>
         <div className="notification-bar">{t('INVESTIGATIONAL USE ONLY')}</div>
-        <div className={`entry-header ${home ? 'header-big' : ''}`}>
+        <div className={`entry-header`}>
+          {/* ${home ? 'header-big' : '' } */}
           <div className="header-left-box">
             {location && location.studyLink && (
               <Link
@@ -109,9 +110,9 @@ class Header extends Component {
           </div>
 
           <div className="header-menu">
-            <span className="research-use">
+            {/* <span className="research-use">
               {t('INVESTIGATIONAL USE ONLY')}
-            </span>
+            </span> */}
             <Dropdown title={t('Options')} list={this.options} align="right" />
           </div>
         </div>

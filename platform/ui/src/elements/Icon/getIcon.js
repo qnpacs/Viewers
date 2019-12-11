@@ -53,6 +53,8 @@ import measureTargetUn from './icons/measure-target-un.svg';
 import measureTemp from './icons/measure-temp.svg';
 import objectGroup from './icons/object-group.svg';
 import ohifLogo from './icons/ohif-logo.svg';
+import qnpacsLogo from './icons/qnpacs-logo.svg';
+import qnpacsTextLogo from './icons/qnpacs-text-logo.svg';
 import ohifTextLogo from './icons/ohif-text-logo.svg';
 import oval from './icons/oval.svg';
 import palette from './icons/palette.svg';
@@ -122,6 +124,8 @@ const ICONS = {
   list,
   'ohif-logo': ohifLogo,
   'ohif-text-logo': ohifTextLogo,
+  'qnpacs-logo': qnpacsLogo,
+  'qnpacs-text-logo': qnpacsTextLogo,
   lock,
   play,
   database,
