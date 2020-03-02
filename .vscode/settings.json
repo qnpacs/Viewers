@@ -29,5 +29,6 @@
   "prettier.disableLanguages": [
     "html"
   ],
-  "workbench.colorCustomizations": {}
+  "workbench.colorCustomizations": {},
+  "liveServer.settings.port": 5001
 }

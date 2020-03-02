@@ -226,7 +226,9 @@ async function makeSOPInstance(server, study, instance) {
     planarConfiguration: DICOMWeb.getNumber(instance['00280006']),
     rows: DICOMWeb.getNumber(instance['00280010']),
     columns: DICOMWeb.getNumber(instance['00280011']),
-    pixelSpacing: DICOMWeb.getString(instance['00280030']),
+    pixelSpacing:
+      DICOMWeb.getString(instance['00280030']) ||
+      DICOMWeb.getString(instance['00181164']),
     pixelAspectRatio: DICOMWeb.getString(instance['00280034']),
     bitsAllocated: DICOMWeb.getNumber(instance['00280100']),
     bitsStored: DICOMWeb.getNumber(instance['00280101']),
