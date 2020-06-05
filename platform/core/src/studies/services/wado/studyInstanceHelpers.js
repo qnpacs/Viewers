@@ -71,7 +71,7 @@ function buildInstanceWadoUrl(
   params.push(`seriesUID=${seriesInstanceUid}`);
   params.push(`objectUID=${sopInstanceUid}`);
   params.push('contentType=application/dicom');
-  params.push('transferSyntax=*');
+  params.push('transferSyntax=1.2.840.10008.1.2.4.50');
 
   const paramString = params.join('&');
 

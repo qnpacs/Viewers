@@ -30,5 +30,8 @@
     "html"
   ],
   "workbench.colorCustomizations": {},
-  "liveServer.settings.port": 5001
+  "liveServer.settings.port": 5001,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
 }
