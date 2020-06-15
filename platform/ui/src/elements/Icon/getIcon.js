@@ -83,6 +83,7 @@ import times from './icons/times.svg';
 import trash from './icons/trash.svg';
 import user from './icons/user.svg';
 import youtube from './icons/youtube.svg';
+import report from './icons/report.svg';
 
 const ICONS = {
   user,
@@ -168,6 +169,7 @@ const ICONS = {
   'soft-tissue': softTissue,
   lung,
   liver,
+  report,
 };
 
 /**
