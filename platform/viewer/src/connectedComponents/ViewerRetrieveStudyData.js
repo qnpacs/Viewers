@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { metadata, studies, utils, log } from '@ohif/core';
+import usePrevious from '../customHooks/usePrevious';
 
 import ConnectedViewer from './ConnectedViewer.js';
 import PropTypes from 'prop-types';
@@ -8,7 +9,7 @@ import { useSnackbarContext } from '@ohif/ui';
 
 const { OHIFStudyMetadata, OHIFSeriesMetadata } = metadata;
 const { retrieveStudiesMetadata, deleteStudyMetadataPromise } = studies;
-const { studyMetadataManager, updateMetaDataManager, makeCancelable } = utils;
+const { studyMetadataManager, makeCancelable } = utils;
 
 // Contexts
 import AppContext from '../context/AppContext';
@@ -60,7 +61,7 @@ const _promoteStudyDisplaySet = (study, studyMetadata, filters) => {
     const { seriesInstanceUID } = filters;
 
     const _seriesLookup = (valueToCompare, displaySet) => {
-      return displaySet.seriesInstanceUid === valueToCompare;
+      return displaySet.SeriesInstanceUID === valueToCompare;
     };
     const promotedResponse = _promoteToFront(
       studyMetadata.getDisplaySets(),
@@ -90,10 +91,10 @@ const _isQueryParamApplied = (study, filters = {}, isFilterStrategy) => {
     return applied;
   }
 
-  const { seriesList = [], displaySets = [] } = study;
-  const firstSeries = isFilterStrategy ? seriesList[0] : displaySets[0];
+  const { series = [], displaySets = [] } = study;
+  const firstSeries = isFilterStrategy ? series[0] : displaySets[0];
 
-  if (!firstSeries || firstSeries.seriesInstanceUid !== seriesInstanceUID) {
+  if (!firstSeries || firstSeries.SeriesInstanceUID !== seriesInstanceUID) {
     applied = false;
   }
 
@@ -115,22 +116,25 @@ const _addSeriesToStudy = (studyMetadata, series) => {
     extensionManager.modules['sopClassHandlerModule'];
   const study = studyMetadata.getData();
   const seriesMetadata = new OHIFSeriesMetadata(series, study);
-  studyMetadata.addSeries(seriesMetadata);
+  const existingSeries = studyMetadata.getSeriesByUID(series.SeriesInstanceUID);
+  if (existingSeries) {
+    studyMetadata.updateSeries(series.SeriesInstanceUID, seriesMetadata);
+  } else {
+    studyMetadata.addSeries(seriesMetadata);
+  }
+
   studyMetadata.createAndAddDisplaySetsForSeries(
     sopClassHandlerModules,
     seriesMetadata,
-    false
   );
   study.displaySets = studyMetadata.getDisplaySets();
-  _updateMetaDataManager(study, series.seriesInstanceUid);
+  _updateStudyMetadataManager(study, studyMetadata);
 };
 
-const _updateMetaDataManager = (study, studyMetadata, series) => {
-  updateMetaDataManager(study, series);
+const _updateStudyMetadataManager = (study, studyMetadata) => {
+  const { StudyInstanceUID } = study;
 
-  const { studyInstanceUID } = study;
-
-  if (!studyMetadataManager.get(studyInstanceUID)) {
+  if (!studyMetadataManager.get(StudyInstanceUID)) {
     studyMetadataManager.add(studyMetadata);
   }
 };
@@ -149,38 +153,33 @@ const _updateStudyDisplaySets = (study, studyMetadata) => {
 const _sortStudyDisplaySet = (study, studyMetadata) => {
   studyMetadata.sortDisplaySets(study.displaySets);
 };
-const _loadRemainingSeries = studyMetadata => {
-  const { seriesLoader } = studyMetadata.getData();
-  if (!seriesLoader) {
-    return Promise.resolve();
-  }
-  const promisesLoaders = [];
-  while (seriesLoader.hasNext()) {
-    promisesLoaders.push(
-      seriesLoader
-        .next()
-        .then(
-          series => void _addSeriesToStudy(studyMetadata, series),
-          error => void log.error(error)
-        )
-    );
-  }
 
-  return Promise.all(promisesLoaders);
+const _thinStudyData = study => {
+  return {
+    StudyInstanceUID: study.StudyInstanceUID,
+    series: study.series.map(item => ({
+      SeriesInstanceUID: item.SeriesInstanceUID
+    })),
+  }
 };
 
 function ViewerRetrieveStudyData({
   server,
-  studyInstanceUids,
-  seriesInstanceUids,
+  studyInstanceUIDs,
+  seriesInstanceUIDs,
   clearViewportSpecificData,
+  setStudyData,
 }) {
   // hooks
   const [error, setError] = useState(false);
   const [studies, setStudies] = useState([]);
+  const [isStudyLoaded, setIsStudyLoaded] = useState(false);
   const snackbarContext = useSnackbarContext();
   const { appConfig = {} } = useContext(AppContext);
-  const { filterQueryParam: isFilterStrategy = false } = appConfig;
+  const {
+    filterQueryParam: isFilterStrategy = false,
+    maxConcurrentMetadataRequests,
+  } = appConfig;
 
   let cancelableSeriesPromises;
   let cancelableStudiesPromises;
@@ -218,6 +217,7 @@ function ViewerRetrieveStudyData({
     );
 
     setStudies([...studies, study]);
+    setIsStudyLoaded(true);
   };
 
   /**
@@ -230,17 +230,18 @@ function ViewerRetrieveStudyData({
     if (Array.isArray(studiesData) && studiesData.length > 0) {
       // Map studies to new format, update metadata manager?
       const studies = studiesData.map(study => {
+        setStudyData(study.StudyInstanceUID, _thinStudyData(study));
         const studyMetadata = new OHIFStudyMetadata(
           study,
-          study.studyInstanceUid
+          study.StudyInstanceUID
         );
 
         _updateStudyDisplaySets(study, studyMetadata);
-        _updateMetaDataManager(study, studyMetadata);
+        _updateStudyMetadataManager(study, studyMetadata);
 
         // Attempt to load remaning series if any
-        cancelableSeriesPromises[study.studyInstanceUid] = makeCancelable(
-          _loadRemainingSeries(studyMetadata)
+        cancelableSeriesPromises[study.StudyInstanceUID] = makeCancelable(
+          loadRemainingSeries(studyMetadata)
         )
           .then(result => {
             if (result && !result.isCanceled) {
@@ -250,6 +251,7 @@ function ViewerRetrieveStudyData({
           .catch(error => {
             if (error && !error.isCanceled) {
               setError(true);
+              log.error(error);
             }
           });
 
@@ -260,13 +262,35 @@ function ViewerRetrieveStudyData({
     }
   };
 
+  const forceRerender = () => setStudies(studies => [...studies]);
+
+  const loadRemainingSeries = async studyMetadata => {
+    const { seriesLoader } = studyMetadata.getData();
+    if (!seriesLoader) return;
+
+    const loadNextSeries = async () => {
+      if (!seriesLoader.hasNext()) return;
+      const series = await seriesLoader.next();
+      _addSeriesToStudy(studyMetadata, series);
+      forceRerender();
+      return loadNextSeries();
+    };
+
+    const concurrentRequestsAllowed = maxConcurrentMetadataRequests || studyMetadata.getSeriesCount();
+    const promises = Array(concurrentRequestsAllowed)
+      .fill(null)
+      .map(loadNextSeries);
+
+    return await Promise.all(promises);
+  };
+
   const loadStudies = async () => {
     try {
       const filters = {};
       // Use the first, discard others
-      const seriesInstanceUID = seriesInstanceUids && seriesInstanceUids[0];
+      const seriesInstanceUID = seriesInstanceUIDs && seriesInstanceUIDs[0];
 
-      const retrieveParams = [server, studyInstanceUids];
+      const retrieveParams = [server, studyInstanceUIDs];
 
       if (seriesInstanceUID) {
         filters.seriesInstanceUID = seriesInstanceUID;
@@ -276,7 +300,7 @@ function ViewerRetrieveStudyData({
         }
       }
 
-      cancelableStudiesPromises[studyInstanceUids] = makeCancelable(
+      cancelableStudiesPromises[studyInstanceUIDs] = makeCancelable(
         retrieveStudiesMetadata(...retrieveParams)
       )
         .then(result => {
@@ -287,35 +311,46 @@ function ViewerRetrieveStudyData({
         .catch(error => {
           if (error && !error.isCanceled) {
             setError(true);
+            log.error(error);
           }
         });
     } catch (error) {
       if (error) {
         setError(true);
+        log.error(error);
       }
     }
   };
 
   const purgeCancellablePromises = () => {
-    for (let studyInstanceUids in cancelableStudiesPromises) {
-      if ('cancel' in cancelableStudiesPromises[studyInstanceUids]) {
-        cancelableStudiesPromises[studyInstanceUids].cancel();
+    for (let studyInstanceUIDs in cancelableStudiesPromises) {
+      if ('cancel' in cancelableStudiesPromises[studyInstanceUIDs]) {
+        cancelableStudiesPromises[studyInstanceUIDs].cancel();
       }
     }
 
-    for (let studyInstanceUids in cancelableSeriesPromises) {
-      if ('cancel' in cancelableSeriesPromises[studyInstanceUids]) {
-        cancelableSeriesPromises[studyInstanceUids].cancel();
-        deleteStudyMetadataPromise(studyInstanceUids);
-        studyMetadataManager.remove(studyInstanceUids);
+    for (let studyInstanceUIDs in cancelableSeriesPromises) {
+      if ('cancel' in cancelableSeriesPromises[studyInstanceUIDs]) {
+        cancelableSeriesPromises[studyInstanceUIDs].cancel();
+        deleteStudyMetadataPromise(studyInstanceUIDs);
+        studyMetadataManager.remove(studyInstanceUIDs);
       }
     }
   };
 
+  const prevStudyInstanceUIDs = usePrevious(studyInstanceUIDs);
+
   useEffect(() => {
-    studyMetadataManager.purge();
-    purgeCancellablePromises();
-  }, [studyInstanceUids]);
+    const hasStudyInstanceUIDsChanged = !(
+      prevStudyInstanceUIDs &&
+      prevStudyInstanceUIDs.every(e => studyInstanceUIDs.includes(e))
+    );
+
+    if (hasStudyInstanceUIDsChanged) {
+      studyMetadataManager.purge();
+      purgeCancellablePromises();
+    }
+  }, [studyInstanceUIDs]);
 
   useEffect(() => {
     cancelableSeriesPromises = {};
@@ -332,15 +367,20 @@ function ViewerRetrieveStudyData({
   }
 
   return (
-    <ConnectedViewer studies={studies} studyInstanceUids={studyInstanceUids} />
+    <ConnectedViewer
+      studies={studies}
+      isStudyLoaded={isStudyLoaded}
+      studyInstanceUIDs={studyInstanceUIDs}
+    />
   );
 }
 
 ViewerRetrieveStudyData.propTypes = {
-  studyInstanceUids: PropTypes.array.isRequired,
-  seriesInstanceUids: PropTypes.array,
+  studyInstanceUIDs: PropTypes.array.isRequired,
+  seriesInstanceUIDs: PropTypes.array,
   server: PropTypes.object,
   clearViewportSpecificData: PropTypes.func.isRequired,
+  setStudyData: PropTypes.func.isRequired,
 };
 
 export default ViewerRetrieveStudyData;

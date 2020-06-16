@@ -1,15 +1,13 @@
 import ServicesManager from './ServicesManager.js';
-import createUINotificationService from './UINotificationService';
-import createUIModalService from './UIModalService';
-import createUIDialogService from './UIDialogService';
-import createUIContextMenuService from './UIContextMenuService';
-import createUILabellingFlowService from './UILabellingFlowService';
+import UINotificationService from './UINotificationService';
+import UIModalService from './UIModalService';
+import UIDialogService from './UIDialogService';
+import MeasurementService from './MeasurementService';
 
 export {
-  createUINotificationService,
-  createUIModalService,
-  createUIDialogService,
-  createUIContextMenuService,
-  createUILabellingFlowService,
+  UINotificationService,
+  UIModalService,
+  UIDialogService,
   ServicesManager,
+  MeasurementService,
 };

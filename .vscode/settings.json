@@ -26,9 +26,10 @@
       "autoFix": true
     }
   ],
-  "prettier.disableLanguages": [
-    "html"
-  ],
+  "prettier.disableLanguages": ["html"],
+  "prettier.endOfLine": "lf",
   "workbench.colorCustomizations": {},
-  "liveServer.settings.port": 5001
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
 }

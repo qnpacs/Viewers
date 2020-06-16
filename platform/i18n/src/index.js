@@ -29,19 +29,20 @@ function addLocales(newLocales) {
   customDebug(resourceBundle, 'info');
 }
 
-// Note: Developers can add the API key to use the in-context editor.
-// DO NOT commit the API key
-const config = (window.config && window.config.i18n) || {};
-
+/*
+ * Note: Developers can add the API key to use the
+ * in-context editor using environment variables.
+ * (DO NOT commit the API key)
+ */
 const locizeOptions = {
-  projectId: config.LOCIZE_PROJECTID,
-  apiKey: config.LOCIZE_API_KEY,
+  projectId: process.env.LOCIZE_PROJECTID,
+  apiKey: process.env.LOCIZE_API_KEY,
   referenceLng: 'en-US',
   fallbacklng: 'en-US',
 };
 
-const envUseLocize = !!config.USE_LOCIZE;
-const envApiKeyAvailable = !!config.LOCIZE_API_KEY;
+const envUseLocize = !!process.env.USE_LOCIZE;
+const envApiKeyAvailable = !!process.env.LOCIZE_API_KEY;
 const DEFAULT_LANGUAGE = 'en-US';
 
 function initI18n(
@@ -138,5 +139,8 @@ i18n.initializing = initI18n();
 i18n.initI18n = initI18n;
 i18n.addLocales = addLocales;
 i18n.defaultLanguage = DEFAULT_LANGUAGE;
+
+import getAvailableLanguagesInfo from './getAvailableLanguagesInfo.js';
+i18n.availableLanguages = getAvailableLanguagesInfo(locales);
 
 export default i18n;

@@ -2,8 +2,8 @@
 
 - [Overview](#overview)
 - [Example](#example)
-- [Tips & Tricks](#/)
-- [Maintained Services](#/)
+- [Tips & Tricks](#tips--tricks)
+- [Maintained Services](#maintained-services)
 
 ## Overview
 
@@ -43,7 +43,7 @@ translate to in practice?
 
 ```js
 // In the application
-const UINotificationService = createUINotificationService();
+import UINotificationService from '@ohif/core';
 const servicesManager = new ServicesManager();
 
 servicesManager.registerService(UINotificationService);

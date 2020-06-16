@@ -19,7 +19,9 @@ const StudyListRouting = asyncComponent(() =>
   )
 );
 const StandaloneRouting = asyncComponent(() =>
-  import(/* webpackChunkName: "StandaloneRouting" */ './StandaloneRouting.js')
+  import(
+    /* webpackChunkName: "ConnectedStandaloneRouting" */ '../connectedComponents/ConnectedStandaloneRouting.js'
+  )
 );
 const ViewerLocalFileData = asyncComponent(() =>
   import(
@@ -32,7 +34,7 @@ const reload = () => window.location.reload();
 const ROUTES_DEF = {
   default: {
     viewer: {
-      path: '/viewer/:studyInstanceUids',
+      path: '/viewer/:studyInstanceUIDs',
       component: ViewerRouting,
     },
     standaloneViewer: {
@@ -43,9 +45,7 @@ const ROUTES_DEF = {
       path: ['/studylist', '/'],
       component: StudyListRouting,
       condition: appConfig => {
-        return appConfig.showStudyList !== undefined
-          ? appConfig.showStudyList
-          : true;
+        return appConfig.showStudyList;
       },
     },
     local: {
@@ -54,12 +54,13 @@ const ROUTES_DEF = {
     },
     IHEInvokeImageDisplay: {
       path: '/IHEInvokeImageDisplay',
+      component: IHEInvokeImageDisplay
     },
   },
   gcloud: {
     viewer: {
       path:
-        '/projects/:project/locations/:location/datasets/:dataset/dicomStores/:dicomStore/study/:studyInstanceUids',
+        '/projects/:project/locations/:location/datasets/:dataset/dicomStores/:dicomStore/study/:studyInstanceUIDs',
       component: ViewerRouting,
       condition: appConfig => {
         return !!appConfig.enableGoogleCloudAdapter;
@@ -70,10 +71,7 @@ const ROUTES_DEF = {
         '/projects/:project/locations/:location/datasets/:dataset/dicomStores/:dicomStore',
       component: StudyListRouting,
       condition: appConfig => {
-        const showList =
-          appConfig.showStudyList !== undefined
-            ? appConfig.showStudyList
-            : true;
+        const showList = appConfig.showStudyList;
 
         return showList && !!appConfig.enableGoogleCloudAdapter;
       },

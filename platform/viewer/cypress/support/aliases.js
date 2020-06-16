@@ -1,22 +1,23 @@
 //Creating aliases for Cornerstone tools buttons
 export function initCornerstoneToolsAliases() {
-  cy.get('.ToolbarRow > :nth-child(2)').as('stackScrollBtn');
-  cy.get('.ToolbarRow > :nth-child(3)').as('zoomBtn');
-  cy.get('.ToolbarRow > :nth-child(4)').as('levelsBtn');
-  cy.get('.ToolbarRow > :nth-child(5)').as('panBtn');
-  cy.get('.ToolbarRow > :nth-child(6)').as('lengthBtn');
-  cy.get('.ToolbarRow > :nth-child(7)').as('annotateBtn');
-  cy.get('.ToolbarRow > :nth-child(8)').as('angleBtn');
-  cy.get('.ToolbarRow > :nth-child(9)').as('resetBtn');
-  cy.get('.ToolbarRow > :nth-child(10)').as('cineBtn');
-  cy.get('.expandableToolMenu').as('moreBtn');
-  cy.get('.btn-group > .toolbar-button').as('layoutBtn');
+  cy.get('[data-cy="stack scroll"]').as('stackScrollBtn');
+  cy.get('[data-cy="zoom"]').as('zoomBtn');
+  cy.get('[data-cy="levels"]').as('levelsBtn');
+  cy.get('[data-cy="pan"]').as('panBtn');
+  cy.get('[data-cy="length"]').as('lengthBtn');
+  cy.get('[data-cy="annotate"]').as('annotateBtn');
+  cy.get('[data-cy="angle"]').as('angleBtn');
+  cy.get('[data-cy="reset"]').as('resetBtn');
+  cy.get('[data-cy="cine"]').as('cineBtn');
+  cy.get('[data-cy="more"]').as('moreBtn');
+  cy.get('[data-cy="layout"]').as('layoutBtn');
+  cy.get('.viewport-element').as('viewport');
 }
 
 //Creating aliases for Common page elements
 export function initCommonElementsAliases() {
   cy.get(
-    '.pull-right > .RoundedButtonGroup > .roundedButtonWrapper > .roundedButton'
+    '.pull-right > .RoundedButtonGroup > .roundedButtonWrapper:first-of-type > .roundedButton'
   ).as('measurementsBtn');
   cy.get('.viewport-element').as('viewport');
   cy.get('section.sidepanel.from-right').as('measurementsPanel');
@@ -43,26 +44,26 @@ export function initRouteAliases() {
 
 //Creating aliases for VTK tools buttons
 export function initVTKToolsAliases() {
-  cy.get('.PluginSwitch > .toolbar-button').as('twodmprBtn');
-  cy.get('.ToolbarRow > :nth-child(2)').as('crosshairsBtn');
-  cy.get('.ToolbarRow > :nth-child(3)').as('wwwcBtn');
-  cy.get('.ToolbarRow > :nth-child(4)').as('rotateBtn');
+  cy.get('[data-cy="exit 2d mpr"]').as('exit2dmprBtn');
+  cy.get('[data-cy="crosshairs"]').as('crosshairsBtn');
+  cy.get('[data-cy="wwwc"]').as('wwwcBtn');
+  cy.get('[data-cy="rotate"]').as('rotateBtn');
   cy.get('.slab-thickness').as('slabSlider');
   cy.get('.select-ohif').as('modeDropdown');
   cy.get('.ohif-check-label').as('modeCheckbox');
-  cy.get('.btn-group > .toolbar-button').as('layoutBtn');
+  cy.get('[data-cy="layout"]').as('layoutBtn');
 }
 
 //Creating aliases for Study List page elements on Desktop experience
 export function initStudyListAliasesOnDesktop() {
   cy.get('.study-count').as('studyCount');
-  cy.get('#filter-patientName').as('patientName');
-  cy.get('#filter-patientId').as('MRN');
-  cy.get('#filter-accessionNumber').as('accessionNumber');
+  cy.get('#filter-PatientName').as('PatientName');
+  cy.get('#filter-PatientID').as('MRN');
+  cy.get('#filter-AccessionNumber').as('AccessionNumber');
   cy.get('#start-date').as('studyListStartDate');
   cy.get('#end-date').as('studyListEndDate');
   cy.get('#filter-modalities').as('modalities');
-  cy.get('#filter-studyDescription').as('studyDescription');
+  cy.get('#filter-StudyDescription').as('StudyDescription');
   cy.get('[data-cy="study-list-results"] > tr').as('searchResult');
 }
 
@@ -81,13 +82,15 @@ export function initStudyListAliasesOnTablet() {
 //Creating aliases for User Preferences modal
 export function initPreferencesModalAliases() {
   cy.get('.OHIFModal').as('preferencesModal');
-  cy.get('.nav-link')
-    .first()
-    .as('userPreferencesHotkeysTab');
-  cy.get('.nav-link')
-    .last()
-    .as('userPreferencesGeneralTab');
-  cy.get('[data-cy="reset-default-btn"]').as('restoreBtn');
-  cy.get('[data-cy="cancel-btn"]').as('cancelBtn');
-  cy.get('[data-cy="save-btn"]').as('saveBtn');
+  cy.get('[data-cy="hotkeys"]').as('userPreferencesHotkeysTab');
+  cy.get('[data-cy="general"]').as('userPreferencesGeneralTab');
+  cy.get('[data-cy="window-level"]').as('userPreferencesWindowLevelTab');
+  initPreferencesModalFooterBtnAliases();
+}
+
+//Creating aliases for User Preferences modal
+export function initPreferencesModalFooterBtnAliases() {
+  cy.get('.active [data-cy="reset-default-btn"]').as('restoreBtn');
+  cy.get('.active [data-cy="cancel-btn"]').as('cancelBtn');
+  cy.get('.active [data-cy="save-btn"]').as('saveBtn');
 }

@@ -1,6 +1,8 @@
+import React from 'react';
 import asyncComponent from './asyncComponent.js';
 import commandsModule from './commandsModule.js';
 import toolbarModule from './toolbarModule.js';
+import withCommandsManager from './withCommandsManager.js';
 // This feels weird
 // import loadLocales from './loadLocales';
 
@@ -14,8 +16,9 @@ const vtkExtension = {
    */
   id: 'vtk',
 
-  getViewportModule() {
-    return OHIFVTKViewport;
+  getViewportModule({ commandsManager }) {
+    const ExtendedVTKViewport = props => <OHIFVTKViewport {...props} />;
+    return withCommandsManager(ExtendedVTKViewport, commandsManager);
   },
   getToolbarModule() {
     return toolbarModule;

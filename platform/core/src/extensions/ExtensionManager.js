@@ -2,13 +2,15 @@ import MODULE_TYPES from './MODULE_TYPES.js';
 import log from './../log.js';
 
 export default class ExtensionManager {
-  constructor({ commandsManager, servicesManager }) {
+  constructor({ commandsManager, servicesManager, api, appConfig = {} }) {
     this.modules = {};
     this.registeredExtensionIds = [];
     this.moduleTypeNames = Object.values(MODULE_TYPES);
     //
     this._commandsManager = commandsManager;
     this._servicesManager = servicesManager;
+    this._appConfig = appConfig;
+    this._api = api;
 
     this.moduleTypeNames.forEach(moduleType => {
       this.modules[moduleType] = [];
@@ -70,6 +72,7 @@ export default class ExtensionManager {
       extension.preRegistration({
         servicesManager: this._servicesManager,
         commandsManager: this._commandsManager,
+        appConfig: this._appConfig,
         configuration,
       });
     }
@@ -79,7 +82,8 @@ export default class ExtensionManager {
       const extensionModule = this._getExtensionModule(
         moduleType,
         extension,
-        extensionId
+        extensionId,
+        configuration
       );
 
       if (extensionModule) {
@@ -102,7 +106,7 @@ export default class ExtensionManager {
    * @param {Object} extension
    * @param {string} extensionId - Used for logging warnings
    */
-  _getExtensionModule(moduleType, extension, extensionId) {
+  _getExtensionModule(moduleType, extension, extensionId, configuration) {
     const getModuleFnName = 'get' + _capitalizeFirstCharacter(moduleType);
     const getModuleFn = extension[getModuleFnName];
 
@@ -114,6 +118,9 @@ export default class ExtensionManager {
       const extensionModule = getModuleFn({
         servicesManager: this._servicesManager,
         commandsManager: this._commandsManager,
+        appConfig: this._appConfig,
+        configuration,
+        api: this._api
       });
 
       if (!extensionModule) {

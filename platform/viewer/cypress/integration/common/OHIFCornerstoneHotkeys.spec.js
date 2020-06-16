@@ -1,8 +1,9 @@
 describe('OHIF Cornerstone Hotkeys', () => {
   before(() => {
-    cy.openStudy('MISTER^MR');
-    cy.waitDicomImage();
-    cy.expectMinimumThumbnails(3);
+    cy.checkStudyRouteInViewer(
+      '1.2.840.113619.2.5.1762583153.215519.978957063.78'
+    );
+    cy.expectMinimumThumbnails(5);
   });
 
   beforeEach(() => {
@@ -42,14 +43,6 @@ describe('OHIF Cornerstone Hotkeys', () => {
     cy.get('@viewportInfoMidTop').should('contains.text', 'P');
   });
 
-  it('checks if hotkey "I" can invert the image', () => {
-    // Hotkey I
-    cy.get('body').type('I');
-    // Visual comparison
-    cy.screenshot('Hotkey I - Should Invert Image');
-    cy.percyCanvasSnapshot('Hotkey I - Should Invert Image');
-  });
-
   it('checks if hotkeys "+", "-" and "=" can zoom in, out and fit to viewport', () => {
     // Hotkey +
     cy.get('body').type('+++'); // Press hotkey 3 times
@@ -74,17 +67,11 @@ describe('OHIF Cornerstone Hotkeys', () => {
     cy.get('@viewportInfoMidLeft').should('contains.text', 'R');
     cy.get('@viewportInfoMidTop').should('contains.text', 'A');
     cy.get('@viewportInfoBottomRight').should('contains.text', 'Zoom: 211%');
-
-    // Visual comparison to make sure the 'inverted' image was reset
-    cy.screenshot('Hotkey SPACEBAR - Should Reset Image');
-    cy.percyCanvasSnapshot('Hotkey SPACEBAR - Should Reset Image');
   });
 
   it('uses hotkeys "RightArrow" and "LeftArrow" to navigate between multiple viewports', () => {
-    //Click on Layout button
-    cy.get('@layoutBtn').click();
-    //Select 3 viewports
-    cy.get('tbody > :nth-child(1) > :nth-child(3)').click();
+    //Select viewport layout (3,1)
+    cy.setLayout(3, 1);
     cy.waitViewportImageLoading();
 
     // Press multiples hotkeys on viewport #1
@@ -130,6 +117,9 @@ describe('OHIF Cornerstone Hotkeys', () => {
     cy.get('@viewport2InfoMidLeft').should('contains.text', 'A');
     cy.get('@viewport2InfoMidTop').should('contains.text', 'H');
     cy.get('@viewport2InfoBottomRight').should('contains.text', 'Zoom: 45%');
+
+    //Select viewport layout (1,1)
+    cy.setLayout(1, 1);
   });
 
   //TO-DO: This test is blocked by issue #1095 (https://github.com/OHIF/Viewers/issues/1095)

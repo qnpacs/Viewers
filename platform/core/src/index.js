@@ -5,6 +5,7 @@ import { ServicesManager } from './services';
 import classes, { CommandsManager, HotkeysManager } from './classes/';
 
 import DICOMWeb from './DICOMWeb';
+import DICOMSR from './DICOMSR';
 import cornerstone from './cornerstone.js';
 import hangingProtocols from './hanging-protocols';
 import header from './header.js';
@@ -17,14 +18,14 @@ import string from './string.js';
 import studies from './studies/';
 import ui from './ui';
 import user from './user.js';
-import utils from './utils/';
+import errorHandler from './errorHandler.js';
+import utils, { hotkeys } from './utils/';
 
 import {
-  createUINotificationService,
-  createUIModalService,
-  createUIDialogService,
-  createUIContextMenuService,
-  createUILabellingFlowService,
+  UINotificationService,
+  UIModalService,
+  UIDialogService,
+  MeasurementService,
 } from './services';
 
 const OHIF = {
@@ -36,6 +37,7 @@ const OHIF = {
   ServicesManager,
   //
   utils,
+  hotkeys,
   studies,
   redux,
   classes,
@@ -45,18 +47,19 @@ const OHIF = {
   string,
   ui,
   user,
+  errorHandler,
   object,
   log,
   DICOMWeb,
+  DICOMSR,
   viewer: {},
   measurements,
   hangingProtocols,
   //
-  createUINotificationService,
-  createUIModalService,
-  createUIDialogService,
-  createUIContextMenuService,
-  createUILabellingFlowService,
+  UINotificationService,
+  UIModalService,
+  UIDialogService,
+  MeasurementService,
 };
 
 export {
@@ -68,6 +71,7 @@ export {
   ServicesManager,
   //
   utils,
+  hotkeys,
   studies,
   redux,
   classes,
@@ -77,17 +81,18 @@ export {
   string,
   ui,
   user,
+  errorHandler,
   object,
   log,
   DICOMWeb,
+  DICOMSR,
   measurements,
   hangingProtocols,
   //
-  createUINotificationService,
-  createUIModalService,
-  createUIDialogService,
-  createUIContextMenuService,
-  createUILabellingFlowService,
+  UINotificationService,
+  UIModalService,
+  UIDialogService,
+  MeasurementService,
 };
 
 export { OHIF };

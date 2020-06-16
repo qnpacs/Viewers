@@ -5,7 +5,7 @@ import { Route, Switch } from 'react-router-dom';
 import { NProgress } from '@tanem/react-nprogress';
 import { CSSTransition } from 'react-transition-group';
 import { connect } from 'react-redux';
-import { ViewerbaseDragDropContext } from '@ohif/ui';
+import { ViewerbaseDragDropContext, ErrorBoundary } from '@ohif/ui';
 import { SignoutCallbackComponent } from 'redux-oidc';
 import asyncComponent from './components/AsyncComponent.js';
 import * as RoutesUtil from './routes/routesUtil';
@@ -52,10 +52,13 @@ class OHIFStandaloneViewer extends Component {
     const { appConfig = {} } = this.context;
     const userNotLoggedIn = userManager && (!user || user.expired);
     if (userNotLoggedIn) {
-      const pathname = this.props.location.pathname;
+      const { pathname, search } = this.props.location;
 
       if (pathname !== '/callback') {
-        sessionStorage.setItem('ohif-redirect-to', pathname);
+        sessionStorage.setItem(
+          'ohif-redirect-to',
+          JSON.stringify({ pathname, search })
+        );
       }
 
       return (
@@ -82,6 +85,53 @@ class OHIFStandaloneViewer extends Component {
           <Route
             path="/callback"
             render={() => <CallbackPage userManager={userManager} />}
+          />
+          <Route
+            path="/login"
+            component={() => {
+              const queryParams = new URLSearchParams(
+                this.props.location.search
+              );
+              const iss = queryParams.get('iss');
+              const loginHint = queryParams.get('login_hint');
+              const targetLinkUri = queryParams.get('target_link_uri');
+              const oidcAuthority =
+                appConfig.oidc !== null && appConfig.oidc[0].authority;
+              if (iss !== oidcAuthority) {
+                console.error(
+                  'iss of /login does not match the oidc authority'
+                );
+                return null;
+              }
+
+              userManager.removeUser().then(() => {
+                if (targetLinkUri !== null) {
+                  const ohifRedirectTo = {
+                    pathname: new URL(targetLinkUri).pathname,
+                  };
+                  sessionStorage.setItem(
+                    'ohif-redirect-to',
+                    JSON.stringify(ohifRedirectTo)
+                  );
+                } else {
+                  const ohifRedirectTo = {
+                    pathname: '/',
+                  };
+                  sessionStorage.setItem(
+                    'ohif-redirect-to',
+                    JSON.stringify(ohifRedirectTo)
+                  );
+                }
+
+                if (loginHint !== null) {
+                  userManager.signinRedirect({ login_hint: loginHint });
+                } else {
+                  userManager.signinRedirect();
+                }
+              });
+
+              return null;
+            }}
           />
           <Route
             component={() => {
@@ -153,7 +203,9 @@ class OHIFStandaloneViewer extends Component {
                   {match === null ? (
                     <></>
                   ) : (
-                    <Component match={match} location={this.props.location} />
+                    <ErrorBoundary context={match.url}>
+                      <Component match={match} location={this.props.location} />
+                    </ErrorBoundary>
                   )}
                 </CSSTransition>
               )}

@@ -3,8 +3,6 @@ class MyComponent extends Component {
   render() {
     return (
       <div
-        draggable="true"
-        className="scrollable"
         style={{
           padding: '20px',
           backgroundColor: 'lightblue',
