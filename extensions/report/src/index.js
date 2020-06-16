@@ -1,4 +1,5 @@
 import MyComponent from './reportComponent';
+import RoiContourMenu from './components/roiContourMenu/RoiContourMenu.js';
 import './variables.css';
 export default {
   /**
@@ -43,7 +44,7 @@ const panelModule = {
     {
       from: 'right',
       id: 'target-component-id',
-      component: MyComponent,
+      component: RoiContourMenu,
     },
   ],
 
@@ -57,7 +58,7 @@ const toolBarModules = {
     {
       from: 'right',
       id: 'segment-panel',
-      component: MyComponent,
+      component: RoiContourMenu,
     },
   ],
 

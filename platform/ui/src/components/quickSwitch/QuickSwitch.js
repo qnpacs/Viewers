@@ -55,9 +55,7 @@ export class QuickSwitch extends Component {
 
     return (
       <div
-        className={`series-quick-switch clearfix noselect ${
-          this.state.sideClass
-        } ${quickSwitchClass}`}
+        className={`series-quick-switch clearfix noselect ${this.state.sideClass} ${quickSwitchClass}`}
         onMouseLeave={this.hideSeriesSwitch}
       >
         <div className="series-switch" onMouseEnter={this.showSeriesSwitch}>
