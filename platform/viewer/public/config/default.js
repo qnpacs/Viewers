@@ -9,7 +9,7 @@ window.config = {
     dicomWeb: [
       {
         name: 'DCM4CHEE',
-        wadoUriRoot: 'https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/wado',
+        wadoUriRoot: 'https://localhost:44384/wadouri',
         qidoRoot: 'https://localhost:44384/wadors',
         wadoRoot: 'https://localhost:44384/wadors',
         qidoSupportsIncludeField: true,
