@@ -1,5 +1,6 @@
-import MyComponent from './reportComponent';
 import './variables.css';
+import MyComponent from './reportComponent';
+
 export default {
   /**
    * Only required property. Should be a unique value across all extensions.

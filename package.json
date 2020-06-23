@@ -40,7 +40,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",
-    "core-js": "^3.2.1"
+    "core-js": "^3.2.1",
+    "jodit-react": "^1.0.48",
+    "react-spinners": "^0.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",

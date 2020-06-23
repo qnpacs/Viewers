@@ -56,8 +56,8 @@ function buildInstanceWadoUrl(
   params.push(`studyUID=${StudyInstanceUID}`);
   params.push(`seriesUID=${SeriesInstanceUID}`);
   params.push(`objectUID=${SOPInstanceUID}`);
-  params.push('contentType=application/dicom');
-  params.push('transferSyntax=*');
+  params.push(`contentType=${server.contentType}`);
+  params.push(`transferSyntax=${server.transferSyntax}`);
 
   const paramString = params.join('&');
 
