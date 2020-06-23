@@ -5,20 +5,30 @@ import 'jodit';
 class Login extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
+      api: 'ApiServer.URL',
       loading: false,
       reLoad: false,
-      content: 'content',
-      content2: 'content2',
+      content: '',
+      content2: '',
       content3: 'content3',
     };
   }
 
+  componentDidMount() {
+    this.getMauBaCao = this.getMauBaCao.bind(this);
+    this.getMauBaCao();
+  }
   updateContent(value) {
     this.setState({ content: value });
   }
+
   updateContent2(value) {
-    this.setState({ content2: value });
+    this.setState({ content2: value }, () => {
+      console.log('updated state value', this.state.content2);
+    });
+    var d = this.state.content2;
   }
   updateContent3(value) {
     this.setState({ content3: value });
@@ -49,7 +59,7 @@ class Login extends Component {
           <div className="container">
             <div className="row  justify-content-center ">
               <div className="col-12 col-md-12">
-                <form onSubmit={submitReport}>
+                <form>
                   <div className="form-group">
                     <div
                       className="form-group"
@@ -215,59 +225,63 @@ class Login extends Component {
       </div>
     );
   }
-}
 
-const submitReport = async event => {
-  event.preventDefault();
-  this.setState({
-    loading: true,
-  });
-  await fetch(this.state.api + '/account/update', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + localStorage.getItem('token'),
-    },
-    body: JSON.stringify({
-      fullName: this.state.fullName,
-      email: this.state.email,
-      phone: this.state.phoneNumber,
-    }),
-  })
-    .then(response => {
-      const statusCode = response.status;
-      const data = response.json();
-      return Promise.all([statusCode, data]);
+  getMauBaCao = async event => {
+    this.updateContent2('ddasdsdsadsdsadsa');
+  };
+  submitReport = async event => {
+    event.preventDefault();
+    this.setState({
+      loading: true,
+    });
+    await fetch(this.state.api + '/account/update', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + localStorage.getItem('token'),
+      },
+      body: JSON.stringify({
+        fullName: this.state.fullName,
+        email: this.state.email,
+        phone: this.state.phoneNumber,
+      }),
     })
-    .then(
-      ([res, data]) => {
-        if (res === 200) {
-          this.setState({
-            loading: false,
-          });
-          document.getElementById('profileModal').style.display = 'none';
-          var all = document.getElementsByClassName('modal-backdrop');
-          for (var i = 0; i < all.length; i++) {
-            all[i].style.display = 'none';
+      .then(response => {
+        const statusCode = response.status;
+        const data = response.json();
+        return Promise.all([statusCode, data]);
+      })
+      .then(
+        ([res, data]) => {
+          if (res === 200) {
+            this.setState({
+              loading: false,
+            });
+            document.getElementById('profileModal').style.display = 'none';
+            var all = document.getElementsByClassName('modal-backdrop');
+            for (var i = 0; i < all.length; i++) {
+              all[i].style.display = 'none';
+            }
+            sessionStorage.setItem('message', 'Update successful!');
+            sessionStorage.setItem('isEnable', true);
+            sessionStorage.setItem('state', 'success');
+            window.location.reload();
+          } else {
+            this.setState({
+              errorMessage: 'Error while update!',
+              loading: false,
+            });
           }
-          sessionStorage.setItem('message', 'Update successful!');
-          sessionStorage.setItem('isEnable', true);
-          sessionStorage.setItem('state', 'success');
-          window.location.reload();
-        } else {
+        },
+        error => {
           this.setState({
-            errorMessage: 'Error while update!',
+            errorMessage: 'An error occurred at the server!',
             loading: false,
           });
         }
-      },
-      error => {
-        this.setState({
-          errorMessage: 'An error occurred at the server!',
-          loading: false,
-        });
-      }
-    );
-};
+      );
+  };
+}
+
 export default Login;
