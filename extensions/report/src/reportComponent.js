@@ -2,53 +2,105 @@ import React, { Component } from 'react';
 import JoditEditor from 'jodit-react';
 import './variables.css';
 import 'jodit';
+import Select from 'react-select';
+import { String } from 'core-js';
+var _Conclusion = '';
+var _MedicalRecommend = '';
+var ReportText = '';
 class Login extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      api: 'ApiServer.URL',
+      api: 'http://192.168.1.200:8081/api/DiagnosticReport/',
       loading: false,
       reLoad: false,
-      content: '',
-      content2: '',
-      content3: 'content3',
+      setConclusion: false,
+      setReportText: false,
+      setMedicalRecommend: false,
+      conclusion: '',
+      ReportText: '',
+      MedicalRecommend: '',
+      OperationTech: '',
+      InternDoctor: '',
+      selectedOption: null,
+      defaultOption: '',
+      guests: [],
+      options: [],
     };
   }
 
   componentDidMount() {
     this.getMauBaCao = this.getMauBaCao.bind(this);
+    this.submitReport = this.submitReport.bind(this);
+    this.submitVeryReport = this.submitVeryReport.bind(this);
     this.getMauBaCao();
   }
-  updateContent(value) {
-    this.setState({ content: value });
-  }
-
-  updateContent2(value) {
-    this.setState({ content2: value }, () => {
-      console.log('updated state value', this.state.content2);
+  updateConclusion = value => {
+    this.setState({
+      conclusion: value,
+      setConclusion: true,
     });
-    var d = this.state.content2;
-  }
-  updateContent3(value) {
-    this.setState({ content3: value });
-  }
+
+    _Conclusion = value;
+  };
+  updateInternDoctor = value => {
+    this.setState({
+      InternDoctor: value,
+    });
+  };
+  updateOperationTech = value => {
+    this.setState({
+      OperationTech: value,
+    });
+  };
+  updateReportText = value => {
+    if (!this.state.setReportText) {
+      this.setState({
+        ReportText: value,
+        setReportText: true,
+      });
+    }
+    _Conclusion = value;
+  };
+  updateMedicalRecommend = value => {
+    if (!this.state.setMedicalRecommend) {
+      this.setState({
+        MedicalRecommend: value,
+        setMedicalRecommend: true,
+      });
+    }
+    _Conclusion = value;
+  };
+  handleChange = selectedOption => {
+    this.setState({ selectedOption });
+  };
   render() {
     const config = {
       readonly: false, // all options from https://xdsoft.net/jodit/doc/
-      minHeight: '50%',
-      height: '300',
+      minHeight: '350',
+      showCharsCounter: false,
+      showWordsCounter: false,
+      showXPathInStatusbar: false,
+      addNewLine: false,
     };
     const config2 = {
       readonly: false, // all options from https://xdsoft.net/jodit/doc/
       minHeight: '10%',
       toolbar: false,
+      showCharsCounter: false,
+      showWordsCounter: false,
+      showXPathInStatusbar: false,
     };
     const config3 = {
       readonly: false, // all options from https://xdsoft.net/jodit/doc/
       minHeight: '10%',
       toolbar: false,
+      showCharsCounter: false,
+      showWordsCounter: false,
+      showXPathInStatusbar: false,
     };
+    const { selectedOption } = this.state;
     return (
       <div
         style={{
@@ -59,7 +111,7 @@ class Login extends Component {
           <div className="container">
             <div className="row  justify-content-center ">
               <div className="col-12 col-md-12">
-                <form>
+                <form onSubmit={this.submitReport}>
                   <div className="form-group">
                     <div
                       className="form-group"
@@ -70,13 +122,11 @@ class Login extends Component {
                       <label className="lableColor">Mẫu báo cáo</label>
                     </div>
                     <div className="form-group">
-                      <select className="form-control">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                      </select>
+                      <Select
+                        value={selectedOption}
+                        onChange={this.handleChange}
+                        options={this.state.options}
+                      />
                     </div>
                   </div>
                   <div className="form-group">
@@ -97,10 +147,11 @@ class Login extends Component {
                               </div>
                               <div className="form-group ">
                                 <input
+                                  value={this.state.InternDoctor}
+                                  onChange={this.updateInternDoctor}
                                   type="text"
                                   className="form-control"
-                                  name="userName"
-                                  required
+                                  name="InternDoctor"
                                 />
                               </div>
                             </div>
@@ -119,10 +170,11 @@ class Login extends Component {
                               </div>
                               <div className="form-group ">
                                 <input
+                                  value={this.state.OperationTech}
+                                  onChange={this.updateOperationTech}
                                   type="text"
                                   className="form-control"
-                                  name="userName"
-                                  required
+                                  name="OperationTech"
                                 />
                               </div>
                             </div>
@@ -141,9 +193,9 @@ class Login extends Component {
                       <label className="lableColor">Báo cáo chẩn đoán</label>
                     </div>
                     <JoditEditor
-                      value={this.state.content}
+                      value={this.state.ReportText}
                       config={config}
-                      onChange={this.updateContent.bind(this)}
+                      onChange={this.updateReportText.bind(this)}
                     />
                   </div>
                   <div className="form-group">
@@ -156,9 +208,9 @@ class Login extends Component {
                       <label className="lableColor">Kết luận</label>
                     </div>
                     <JoditEditor
-                      value={this.state.content2}
+                      value={this.state.conclusion}
                       config={config2}
-                      onChange={this.updateContent2.bind(this)}
+                      onChange={this.updateConclusion.bind(this)}
                     />
                   </div>
                   <div className="form-group">
@@ -171,9 +223,9 @@ class Login extends Component {
                       <label className="lableColor">Đề nghị</label>
                     </div>
                     <JoditEditor
-                      value={this.state.content3}
+                      value={this.state.MedicalRecommend}
                       config={config3}
-                      onChange={this.updateContent3.bind(this)}
+                      onChange={this.updateMedicalRecommend.bind(this)}
                     />
                   </div>
                   <div
@@ -225,63 +277,91 @@ class Login extends Component {
       </div>
     );
   }
-
-  getMauBaCao = async event => {
-    this.updateContent2('ddasdsdsadsdsadsa');
-  };
   submitReport = async event => {
-    event.preventDefault();
-    this.setState({
-      loading: true,
-    });
-    await fetch(this.state.api + '/account/update', {
-      method: 'POST',
+    var a = this.state.OperationTech;
+    var ad = this.state.InternDoctor;
+
+    var t = this.state.selectedOption;
+    var as = 'fsdfsdfdsf';
+  };
+  submitVeryReport = async event => {
+    var a = this.state.OperationTech;
+    var ad = this.state.InternDoctor;
+    var as = 'fsdfsdfdsf';
+  };
+  GetReportTemplate = async id => {
+    await fetch(this.state.api + '/GetReportTemplate?serviceId=' + id, {
+      method: 'GET',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + localStorage.getItem('token'),
       },
-      body: JSON.stringify({
-        fullName: this.state.fullName,
-        email: this.state.email,
-        phone: this.state.phoneNumber,
-      }),
     })
       .then(response => {
         const statusCode = response.status;
-        const data = response.json();
-        return Promise.all([statusCode, data]);
-      })
-      .then(
-        ([res, data]) => {
-          if (res === 200) {
-            this.setState({
-              loading: false,
-            });
-            document.getElementById('profileModal').style.display = 'none';
-            var all = document.getElementsByClassName('modal-backdrop');
-            for (var i = 0; i < all.length; i++) {
-              all[i].style.display = 'none';
-            }
-            sessionStorage.setItem('message', 'Update successful!');
-            sessionStorage.setItem('isEnable', true);
-            sessionStorage.setItem('state', 'success');
-            window.location.reload();
-          } else {
-            this.setState({
-              errorMessage: 'Error while update!',
-              loading: false,
-            });
-          }
-        },
-        error => {
-          this.setState({
-            errorMessage: 'An error occurred at the server!',
-            loading: false,
-          });
+        if (statusCode === 403) {
+          return Promise.all([statusCode, '']);
+        } else {
+          const data = response.json();
+          return Promise.all([statusCode, data]);
         }
-      );
+      })
+      .then(([res, data]) => {
+        if (res >= 200 && res <= 300) {
+          this.state.guests = data.map(v => ({
+            label: v.TemplateName,
+            value: v.Id,
+          }));
+          var v = this.state.guests;
+          data.forEach(n =>
+            this.state.options.push({
+              label: n.TemplateName,
+              value: n.Id,
+            })
+          );
+          this.setState({
+            defaultOption: data[0].Id,
+          });
+
+          var sds = this.state.options;
+        }
+      });
+  };
+  getMauBaCao = async event => {
+    await fetch(
+      this.state.api +
+        '/GetDiagnosticReportByStudyUID?studyUID=4102.19911656.190608005031834963',
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then(response => {
+        const statusCode = response.status;
+        if (statusCode === 403) {
+          return Promise.all([statusCode, '']);
+        } else {
+          const data = response.json();
+          return Promise.all([statusCode, data]);
+        }
+      })
+      .then(async ([res, data]) => {
+        if (res >= 200 && res <= 300) {
+          var a = data.ris_OrderSchedule.ris_ImagingService;
+          this.updateConclusion(data.Conclusion);
+          this.updateReportText(data.ReportText);
+          this.updateMedicalRecommend(data.MedicalRecommend);
+          this.setState({
+            OperationTech: data.OperationTech,
+            InternDoctor: data.InternDoctor,
+            selectedOption: data.ris_ReportTemplateId,
+          });
+          await this.GetReportTemplate(data.ris_ReportTemplateId);
+        }
+      });
   };
 }
-
 export default Login;
