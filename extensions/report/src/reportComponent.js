@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
-import JoditEditor from 'jodit-react';
 import './variables.css';
-import 'jodit';
 import Select from 'react-select';
-import { String } from 'core-js';
-var _Conclusion = '';
-var _MedicalRecommend = '';
-var ReportText = '';
+import './react-draft-wysiwyg.css';
+import { EditorState, convertToRaw, ContentState } from 'draft-js';
+import { Editor } from 'react-draft-wysiwyg';
+import draftToHtml from 'draftjs-to-html';
+import htmlToDraft from 'html-to-draftjs';
+import { ServicesManager, UINotificationService } from '@ohif/core';
+const servicesManager = new ServicesManager();
+
+servicesManager.registerService(UINotificationService);
+
 class Login extends Component {
   constructor(props) {
     super(props);
@@ -15,96 +19,62 @@ class Login extends Component {
       api: 'http://192.168.1.200:8081/api/DiagnosticReport/',
       loading: false,
       reLoad: false,
-      setConclusion: false,
-      setReportText: false,
-      setMedicalRecommend: false,
-      conclusion: '',
-      ReportText: '',
-      MedicalRecommend: '',
+      Conclusion: EditorState.createEmpty(),
+      ReportText: EditorState.createEmpty(),
+      MedicalRecommend: EditorState.createEmpty(),
       OperationTech: '',
       InternDoctor: '',
       selectedOption: null,
       defaultOption: '',
-      guests: [],
       options: [],
+      ris_OrderScheduleId: '',
+      ris_ReportTemplateId: '',
+      reportId: '',
+      value: 'ÁDSADSAD',
     };
-  }
-
-  componentDidMount() {
     this.getMauBaCao = this.getMauBaCao.bind(this);
     this.submitReport = this.submitReport.bind(this);
     this.submitVeryReport = this.submitVeryReport.bind(this);
+    this.printReport = this.printReport.bind(this);
+    this.updateInternDoctor = this.updateInternDoctor.bind(this);
+    this.updateOperationTech = this.updateOperationTech.bind(this);
+
     this.getMauBaCao();
   }
-  updateConclusion = value => {
+  handleChange(value) {
+    this.setState({ selectedOption: value });
+  }
+  onConclusionChange = Conclusion => {
     this.setState({
-      conclusion: value,
-      setConclusion: true,
+      Conclusion,
     });
+  };
+  onReportTextChange = ReportText => {
+    this.setState({
+      ReportText,
+    });
+  };
+  onMedicalRecommendChange = MedicalRecommend => {
+    this.setState({
+      MedicalRecommend,
+    });
+  };
+  updateInternDoctor(event) {
+    this.setState({ InternDoctor: event.target.value });
+  }
+  updateOperationTech(event) {
+    this.setState({ OperationTech: event.target.value });
+  }
 
-    _Conclusion = value;
-  };
-  updateInternDoctor = value => {
-    this.setState({
-      InternDoctor: value,
-    });
-  };
-  updateOperationTech = value => {
-    this.setState({
-      OperationTech: value,
-    });
-  };
-  updateReportText = value => {
-    if (!this.state.setReportText) {
-      this.setState({
-        ReportText: value,
-        setReportText: true,
-      });
-    }
-    _Conclusion = value;
-  };
-  updateMedicalRecommend = value => {
-    if (!this.state.setMedicalRecommend) {
-      this.setState({
-        MedicalRecommend: value,
-        setMedicalRecommend: true,
-      });
-    }
-    _Conclusion = value;
-  };
-  handleChange = selectedOption => {
-    this.setState({ selectedOption });
-  };
   render() {
-    const config = {
-      readonly: false, // all options from https://xdsoft.net/jodit/doc/
-      minHeight: '350',
-      showCharsCounter: false,
-      showWordsCounter: false,
-      showXPathInStatusbar: false,
-      addNewLine: false,
-    };
-    const config2 = {
-      readonly: false, // all options from https://xdsoft.net/jodit/doc/
-      minHeight: '10%',
-      toolbar: false,
-      showCharsCounter: false,
-      showWordsCounter: false,
-      showXPathInStatusbar: false,
-    };
-    const config3 = {
-      readonly: false, // all options from https://xdsoft.net/jodit/doc/
-      minHeight: '10%',
-      toolbar: false,
-      showCharsCounter: false,
-      showWordsCounter: false,
-      showXPathInStatusbar: false,
-    };
-    const { selectedOption } = this.state;
+    const { Conclusion, ReportText, MedicalRecommend } = this.state;
+    const { UINotificationService } = servicesManager.services;
+
     return (
       <div
         style={{
           padding: '20px',
+          // backgroundColor: 'white',
         }}
       >
         <div className="card-body">
@@ -121,13 +91,7 @@ class Login extends Component {
                     >
                       <label className="lableColor">Mẫu báo cáo</label>
                     </div>
-                    <div className="form-group">
-                      <Select
-                        value={selectedOption}
-                        onChange={this.handleChange}
-                        options={this.state.options}
-                      />
-                    </div>
+                    <div className="form-group">{this.SelectComBobox()}</div>
                   </div>
                   <div className="form-group">
                     <table id="top-leader" className="Table-Normal">
@@ -147,11 +111,11 @@ class Login extends Component {
                               </div>
                               <div className="form-group ">
                                 <input
+                                  type="text"
                                   value={this.state.InternDoctor}
                                   onChange={this.updateInternDoctor}
-                                  type="text"
-                                  className="form-control"
                                   name="InternDoctor"
+                                  className="form-control"
                                 />
                               </div>
                             </div>
@@ -192,10 +156,11 @@ class Login extends Component {
                     >
                       <label className="lableColor">Báo cáo chẩn đoán</label>
                     </div>
-                    <JoditEditor
-                      value={this.state.ReportText}
-                      config={config}
-                      onChange={this.updateReportText.bind(this)}
+                    <Editor
+                      editorState={ReportText}
+                      wrapperClassName="demo-wrapper"
+                      editorClassName="demo-editor"
+                      onEditorStateChange={this.onReportTextChange}
                     />
                   </div>
                   <div className="form-group">
@@ -207,10 +172,12 @@ class Login extends Component {
                     >
                       <label className="lableColor">Kết luận</label>
                     </div>
-                    <JoditEditor
-                      value={this.state.conclusion}
-                      config={config2}
-                      onChange={this.updateConclusion.bind(this)}
+                    <Editor
+                      toolbarHidden
+                      editorState={Conclusion}
+                      wrapperClassName="demo-wrapper"
+                      editorClassName="demo-editor"
+                      onEditorStateChange={this.onConclusionChange}
                     />
                   </div>
                   <div className="form-group">
@@ -222,10 +189,12 @@ class Login extends Component {
                     >
                       <label className="lableColor">Đề nghị</label>
                     </div>
-                    <JoditEditor
-                      value={this.state.MedicalRecommend}
-                      config={config3}
-                      onChange={this.updateMedicalRecommend.bind(this)}
+                    <Editor
+                      toolbarHidden
+                      editorState={MedicalRecommend}
+                      wrapperClassName="demo-wrapper"
+                      editorClassName="demo-editor"
+                      onEditorStateChange={this.onMedicalRecommendChange}
                     />
                   </div>
                   <div
@@ -237,20 +206,29 @@ class Login extends Component {
                         <tr>
                           <td>
                             <button
-                              type="submit"
+                              id="btnSaveReport"
+                              type="button"
+                              onClick={this.submitReport}
                               className="btn btn-danger"
                               style={{
+                                display: 'none',
                                 marginRight: 16,
                                 backgroundColor: 'green',
                               }}
                             >
                               <div>Lưu báo cáo</div>
                             </button>
+
                             <button
-                              type="submit"
-                              className="btn"
+                              id="btnVeryReport"
+                              type="button"
+                              onClick={this.submitVeryReport}
+                              className="btn btn-primary"
                               style={{
                                 marginRight: 16,
+                                display: 'none',
+                                color: 'black',
+                                backgroundColor: 'white',
                               }}
                             >
                               Xác nhận
@@ -258,9 +236,10 @@ class Login extends Component {
                           </td>
                           <td>
                             <button
-                              type="submit"
+                              id="btnPrintReport"
+                              type="button"
                               className="btn btn-primary"
-                              style={{ marginRight: 16 }}
+                              style={{ marginRight: 16, display: 'none' }}
                             >
                               In báo cáo
                             </button>
@@ -277,17 +256,210 @@ class Login extends Component {
       </div>
     );
   }
-  submitReport = async event => {
-    var a = this.state.OperationTech;
-    var ad = this.state.InternDoctor;
-
-    var t = this.state.selectedOption;
-    var as = 'fsdfsdfdsf';
+  SelectComBobox = Group => {
+    return (
+      <React.Fragment>
+        <Select
+          options={this.state.options}
+          value={this.state.selectedOption}
+          onChange={value => this.handleChange(value)}
+        />
+      </React.Fragment>
+    );
   };
+
+  editorStateReportText(text) {
+    if (text != null) {
+      const regex = /<p><br><\/p>/g;
+
+      const myString = text.replace(regex, '');
+      const blocksReportText = htmlToDraft(myString);
+      const { contentBlocks, entityMap } = blocksReportText;
+      const contentStateReportText = ContentState.createFromBlockArray(
+        contentBlocks,
+        entityMap
+      );
+      const editorStateReportText = EditorState.createWithContent(
+        contentStateReportText
+      );
+      this.setState({
+        ReportText: editorStateReportText,
+      });
+    }
+  }
+
+  editorStateConclusion(text) {
+    if (text != null) {
+      const blocksConclusion = htmlToDraft(text);
+      const contentStateConclusion = ContentState.createFromBlockArray(
+        blocksConclusion.contentBlocks,
+        blocksConclusion.entityMap
+      );
+      const editorStateConclusion = EditorState.createWithContent(
+        contentStateConclusion
+      );
+      this.setState({
+        Conclusion: editorStateConclusion,
+      });
+    }
+  }
+
+  editorStateMedicalRecommendt(text) {
+    if (text != null) {
+      const blocksMedicalRecommend = htmlToDraft(text);
+      const contentStateMedicalRecommend = ContentState.createFromBlockArray(
+        blocksMedicalRecommend.contentBlocks,
+        blocksMedicalRecommend.entityMap
+      );
+      const editorStateMedicalRecommendt = EditorState.createWithContent(
+        contentStateMedicalRecommend
+      );
+      this.setState({
+        MedicalRecommend: editorStateMedicalRecommendt,
+      });
+    }
+  }
+  submitReport = async event => {
+    var Conclusion = draftToHtml(
+      convertToRaw(this.state.Conclusion.getCurrentContent())
+    );
+    var ReportText = draftToHtml(
+      convertToRaw(this.state.ReportText.getCurrentContent())
+    );
+    var MedicalRecommend = draftToHtml(
+      convertToRaw(this.state.MedicalRecommend.getCurrentContent())
+    );
+    await fetch(this.state.api + '/SaveDiagnosticReport', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ris_OrderScheduleId: this.state.ris_OrderScheduleId,
+        ReportText: ReportText,
+        Conclusion: Conclusion,
+        ReportDateTime: '2020-06-27T04:11:04.091Z',
+        ReportDoctor: this.state.ReportDoctor,
+        InternDoctor: this.state.InternDoctor,
+        VerificationDoctor: 'string',
+        VerificationDateTime: '2020-06-27T04:11:04.091Z',
+        ris_ReportTemplateId: this.state.ris_ReportTemplateId,
+        UserCreated: 'ductinh',
+        IsCancel: true,
+        UserCancel: 'string',
+
+        CancelDateTime: '2020-06-27T04:11:04.092Z',
+        ReportUpdateDate: '2020-06-27T04:11:04.092Z',
+        ReportNo: 0,
+        ProcessFlag: 'N',
+        MedicalRecommend: MedicalRecommend,
+        OperationTech: this.state.OperationTech,
+      }),
+    })
+      .then(response => {
+        const statusCode = response.status;
+        const data = response.json();
+        return Promise.all([statusCode, data]);
+      })
+      .then(
+        ([res, data]) => {
+          if (res === 200) {
+            servicesManager.services.UINotificationService.show({
+              title: 'Thông báo',
+              message: 'Lưu báo cáo chuẩn đoán thành công',
+              type: 'success',
+              autoClose: true,
+            });
+            document.getElementById('btnSaveReport').style.display =
+              'inline-block';
+            document.getElementById('btnVeryReport').style.display =
+              'inline-block';
+            document.getElementById('btnPrintReport').style.display =
+              'inline-block';
+            this.setState({
+              OperationTech: data.OperationTech,
+              InternDoctor: data.InternDoctor,
+              ris_OrderScheduleId: data.ris_OrderScheduleId,
+              ris_ReportTemplateId: data.ris_ReportTemplateId,
+              reportId: data.Id,
+            });
+          } else {
+            this.setState({
+              errorMessage: data.message,
+              loading: false,
+            });
+            servicesManager.services.UINotificationService.show({
+              title: 'Thông báo',
+              message: 'Lưu báo cáo thất bại, vui lòng liên hệ kỹ thuật viên',
+              type: 'error',
+              autoClose: false,
+            });
+          }
+        },
+        error => {
+          this.setState({
+            errorMessage: 'An error occurred at the server!',
+            loading: false,
+          });
+        }
+      );
+  };
+  printReport = async event => {};
   submitVeryReport = async event => {
-    var a = this.state.OperationTech;
-    var ad = this.state.InternDoctor;
-    var as = 'fsdfsdfdsf';
+    await fetch(
+      this.state.api +
+        'VerifyReport?reportId=' +
+        this.state.reportId +
+        '&verifyDoctor=' +
+        'ductinh',
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then(response => {
+        const statusCode = response.status;
+        const data = response.json();
+        return Promise.all([statusCode, data]);
+      })
+      .then(
+        ([res, data]) => {
+          if (res === 200) {
+            servicesManager.services.UINotificationService.show({
+              title: 'Thông báo',
+              message: 'Xác nhận báo cáo chuẩn đoán thành công',
+              type: 'success',
+              autoClose: true,
+            });
+            document.getElementById('btnSaveReport').style.display = 'none';
+            document.getElementById('btnVeryReport').style.display = 'none';
+            document.getElementById('btnPrintReport').style.display =
+              'inline-block';
+          } else {
+            this.setState({
+              errorMessage: data.message,
+              loading: false,
+            });
+            servicesManager.services.UINotificationService.show({
+              title: 'Thông báo',
+              message:
+                'Xác nhận báo cáo chuẩn đoán thất bại, vui lòng liên hệ kỹ thuật viên',
+              type: 'error',
+              autoClose: false,
+            });
+          }
+        },
+        error => {
+          this.setState({
+            errorMessage: 'An error occurred at the server!',
+            loading: false,
+          });
+        }
+      );
   };
   GetReportTemplate = async id => {
     await fetch(this.state.api + '/GetReportTemplate?serviceId=' + id, {
@@ -308,29 +480,25 @@ class Login extends Component {
       })
       .then(([res, data]) => {
         if (res >= 200 && res <= 300) {
-          this.state.guests = data.map(v => ({
-            label: v.TemplateName,
-            value: v.Id,
-          }));
-          var v = this.state.guests;
+          this.setState({
+            selectedOption: {
+              label: data[0].TemplateName,
+              value: data[0].Id,
+            },
+          });
           data.forEach(n =>
             this.state.options.push({
               label: n.TemplateName,
               value: n.Id,
             })
           );
-          this.setState({
-            defaultOption: data[0].Id,
-          });
-
-          var sds = this.state.options;
         }
       });
   };
   getMauBaCao = async event => {
     await fetch(
       this.state.api +
-        '/GetDiagnosticReportByStudyUID?studyUID=4102.19911656.190608005031834963',
+        '/GetDiagnosticReportByStudyUID?studyUID=1846.17020596.190601100226430611',
       {
         method: 'GET',
         headers: {
@@ -350,18 +518,44 @@ class Login extends Component {
       })
       .then(async ([res, data]) => {
         if (res >= 200 && res <= 300) {
-          var a = data.ris_OrderSchedule.ris_ImagingService;
-          this.updateConclusion(data.Conclusion);
-          this.updateReportText(data.ReportText);
-          this.updateMedicalRecommend(data.MedicalRecommend);
+          this.editorStateConclusion(data.Conclusion);
+          this.editorStateMedicalRecommendt(data.MedicalRecommend);
+          this.editorStateReportText(data.ReportText);
           this.setState({
             OperationTech: data.OperationTech,
             InternDoctor: data.InternDoctor,
-            selectedOption: data.ris_ReportTemplateId,
+            ris_OrderScheduleId: data.ris_OrderScheduleId,
+            ris_ReportTemplateId: data.ris_ReportTemplateId,
+            reportId: data.Id,
           });
-          await this.GetReportTemplate(data.ris_ReportTemplateId);
+          // selectedOption: {
+          //   label: data.ris_OrderSchedule.ris_ImagingService.ServiceName,
+          //   value: data.ris_ReportTemplateId,
+          // },
+          if (data.ris_OrderSchedule == null) {
+            document.getElementById('btnSaveReport').style.display =
+              'inline-block';
+          } else {
+            if (data.ris_OrderSchedule.IsReportVerified) {
+              document.getElementById('btnPrintReport').style.display =
+                'inline-block';
+            }
+            if (
+              data.ris_OrderSchedule.IsReported &&
+              !data.ris_OrderSchedule.IsReportVerified
+            ) {
+              document.getElementById('btnSaveReport').style.display =
+                'inline-block';
+              document.getElementById('btnVeryReport').style.display =
+                'inline-block';
+              document.getElementById('btnPrintReport').style.display =
+                'inline-block';
+            }
+          }
+          await this.GetReportTemplate(data.ServiceId);
         }
       });
   };
 }
+
 export default Login;
