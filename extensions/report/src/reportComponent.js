@@ -17,18 +17,27 @@ class Login extends Component {
 
     this.state = {
       api: 'http://192.168.1.200:8081/api/DiagnosticReport/',
-      loading: false,
+      loading: true,
       reLoad: false,
       Conclusion: EditorState.createEmpty(),
       ReportText: EditorState.createEmpty(),
       MedicalRecommend: EditorState.createEmpty(),
       OperationTech: '',
       InternDoctor: '',
+      readOnlySelected: false,
+      readOnlyConclusion: false,
+      readOnlyReportText: false,
+      readOnlyMedicalRecommend: false,
+      readOnlyOperationTech: false,
+      readOnlyInternDoctor: false,
+
       selectedOption: null,
       defaultOption: '',
       options: [],
+      reportTemplate: [],
       ris_OrderScheduleId: '',
       ris_ReportTemplateId: '',
+
       reportId: '',
       value: 'ÁDSADSAD',
     };
@@ -43,6 +52,12 @@ class Login extends Component {
   }
   handleChange(value) {
     this.setState({ selectedOption: value });
+    var data = this.state.reportTemplate.filter(
+      item => item.value === value.value
+    );
+    this.editorStateConclusion(data[0].conclusion);
+    this.editorStateReportText(data[0].description);
+    this.editorStateMedicalRecommendt(data[0].recommend);
   }
   onConclusionChange = Conclusion => {
     this.setState({
@@ -68,16 +83,14 @@ class Login extends Component {
 
   render() {
     const { Conclusion, ReportText, MedicalRecommend } = this.state;
-    const { UINotificationService } = servicesManager.services;
 
     return (
-      <div
-        style={{
-          padding: '20px',
-          // backgroundColor: 'white',
-        }}
-      >
-        <div className="card-body">
+      <div>
+        <div
+          id="divDiagnosePanel"
+          className="card-body"
+          style={{ padding: '20px' }}
+        >
           <div className="container">
             <div className="row  justify-content-center ">
               <div className="col-12 col-md-12">
@@ -111,6 +124,7 @@ class Login extends Component {
                               </div>
                               <div className="form-group ">
                                 <input
+                                  readOnly={this.state.readOnlyInternDoctor}
                                   type="text"
                                   value={this.state.InternDoctor}
                                   onChange={this.updateInternDoctor}
@@ -134,6 +148,7 @@ class Login extends Component {
                               </div>
                               <div className="form-group ">
                                 <input
+                                  readOnly={this.state.readOnlyOperationTech}
                                   value={this.state.OperationTech}
                                   onChange={this.updateOperationTech}
                                   type="text"
@@ -157,6 +172,7 @@ class Login extends Component {
                       <label className="lableColor">Báo cáo chẩn đoán</label>
                     </div>
                     <Editor
+                      readOnly={this.state.readOnlyReportText}
                       editorState={ReportText}
                       wrapperClassName="demo-wrapper"
                       editorClassName="demo-editor"
@@ -173,6 +189,7 @@ class Login extends Component {
                       <label className="lableColor">Kết luận</label>
                     </div>
                     <Editor
+                      readOnly={this.state.readOnlyConclusion}
                       toolbarHidden
                       editorState={Conclusion}
                       wrapperClassName="demo-wrapper"
@@ -190,6 +207,7 @@ class Login extends Component {
                       <label className="lableColor">Đề nghị</label>
                     </div>
                     <Editor
+                      readOnly={this.state.readOnlyMedicalRecommend}
                       toolbarHidden
                       editorState={MedicalRecommend}
                       wrapperClassName="demo-wrapper"
@@ -235,14 +253,17 @@ class Login extends Component {
                             </button>
                           </td>
                           <td>
-                            <button
-                              id="btnPrintReport"
-                              type="button"
-                              className="btn btn-primary"
-                              style={{ marginRight: 16, display: 'none' }}
-                            >
-                              In báo cáo
-                            </button>
+                            <div style={{ float: 'right' }}>
+                              <button
+                                onClick={this.printReport}
+                                id="btnPrintReport"
+                                type="button"
+                                className="btn btn-primary "
+                                style={{ marginRight: 50, display: 'none' }}
+                              >
+                                In báo cáo
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       </tbody>
@@ -253,6 +274,10 @@ class Login extends Component {
             </div>
           </div>
         </div>
+        <div className="print-source">
+          <label />
+          {this.state.value}
+        </div>
       </div>
     );
   }
@@ -260,6 +285,7 @@ class Login extends Component {
     return (
       <React.Fragment>
         <Select
+          isDisabled={this.state.readOnlySelected}
           options={this.state.options}
           value={this.state.selectedOption}
           onChange={value => this.handleChange(value)}
@@ -270,10 +296,10 @@ class Login extends Component {
 
   editorStateReportText(text) {
     if (text != null) {
-      const regex = /<p><br><\/p>/g;
+      // const regex = /<p><br><\/p>/g;
 
-      const myString = text.replace(regex, '');
-      const blocksReportText = htmlToDraft(myString);
+      // const myString = text.replace(regex, '');
+      const blocksReportText = htmlToDraft(text);
       const { contentBlocks, entityMap } = blocksReportText;
       const contentStateReportText = ContentState.createFromBlockArray(
         contentBlocks,
@@ -290,6 +316,9 @@ class Login extends Component {
 
   editorStateConclusion(text) {
     if (text != null) {
+      // const regex = /<p><br><\/p>/g;
+
+      // const myString = text.replace(regex, '');
       const blocksConclusion = htmlToDraft(text);
       const contentStateConclusion = ContentState.createFromBlockArray(
         blocksConclusion.contentBlocks,
@@ -306,6 +335,9 @@ class Login extends Component {
 
   editorStateMedicalRecommendt(text) {
     if (text != null) {
+      // const regex = /<p><br><\/p>/g;
+
+      // const myString = text.replace(regex, '');
       const blocksMedicalRecommend = htmlToDraft(text);
       const contentStateMedicalRecommend = ContentState.createFromBlockArray(
         blocksMedicalRecommend.contentBlocks,
@@ -405,7 +437,45 @@ class Login extends Component {
         }
       );
   };
-  printReport = async event => {};
+  printReport = async event => {
+    await fetch(
+      this.state.api + '/PrintReport?reportId=' + this.state.reportId,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then(response => {
+        const statusCode = response.status;
+        if (statusCode === 403) {
+          return Promise.all([statusCode, '']);
+        } else {
+          const data = response.json();
+          return Promise.all([statusCode, data]);
+        }
+      })
+      .then(([res, data]) => {
+        if (res >= 200 && res <= 300) {
+          var win = window.open(
+            '',
+            'Title',
+            'toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,top=' +
+              (screen.height - 400) +
+              ',left=' +
+              (screen.width - 840)
+          );
+
+          win.document.body.innerHTML = data;
+          win.setTimeout(() => {
+            win.print();
+          }, 1000);
+        }
+      });
+  };
+
   submitVeryReport = async event => {
     await fetch(
       this.state.api +
@@ -439,6 +509,14 @@ class Login extends Component {
             document.getElementById('btnVeryReport').style.display = 'none';
             document.getElementById('btnPrintReport').style.display =
               'inline-block';
+            this.setState({
+              readOnlyConclusion: true,
+              readOnlyInternDoctor: true,
+              readOnlyMedicalRecommend: true,
+              readOnlyReportText: true,
+              readOnlyOperationTech: true,
+              readOnlySelected: true,
+            });
           } else {
             this.setState({
               errorMessage: data.message,
@@ -479,6 +557,9 @@ class Login extends Component {
         }
       })
       .then(([res, data]) => {
+        // this.setState({
+        //   loading: false,
+        // });
         if (res >= 200 && res <= 300) {
           this.setState({
             selectedOption: {
@@ -486,19 +567,26 @@ class Login extends Component {
               value: data[0].Id,
             },
           });
-          data.forEach(n =>
+          data.forEach(n => {
             this.state.options.push({
               label: n.TemplateName,
               value: n.Id,
-            })
-          );
+            }),
+              this.state.reportTemplate.push({
+                label: n.TemplateName,
+                value: n.Id,
+                conclusion: n.Conclusion,
+                description: n.Description,
+                recommend: n.Recommend,
+              });
+          });
         }
       });
   };
   getMauBaCao = async event => {
     await fetch(
       this.state.api +
-        '/GetDiagnosticReportByStudyUID?studyUID=1846.17020596.190601100226430611',
+        '/GetDiagnosticReportByStudyUID?studyUID=31853.18033156.190820094005929864',
       {
         method: 'GET',
         headers: {
@@ -539,11 +627,15 @@ class Login extends Component {
             if (data.ris_OrderSchedule.IsReportVerified) {
               document.getElementById('btnPrintReport').style.display =
                 'inline-block';
-            }
-            if (
-              data.ris_OrderSchedule.IsReported &&
-              !data.ris_OrderSchedule.IsReportVerified
-            ) {
+              this.setState({
+                readOnlyConclusion: true,
+                readOnlyInternDoctor: true,
+                readOnlyMedicalRecommend: true,
+                readOnlyReportText: true,
+                readOnlyOperationTech: true,
+                readOnlySelected: true,
+              });
+            } else {
               document.getElementById('btnSaveReport').style.display =
                 'inline-block';
               document.getElementById('btnVeryReport').style.display =
