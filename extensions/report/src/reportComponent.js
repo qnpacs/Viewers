@@ -14,9 +14,9 @@ servicesManager.registerService(UINotificationService);
 class Login extends Component {
   constructor(props) {
     super(props);
-
+    var url = window.config;
     this.state = {
-      api: 'http://192.168.1.200:8081/api/DiagnosticReport/',
+      api: url.servers.dicomWeb[0].apiUrl,
       loading: true,
       reLoad: false,
       Conclusion: EditorState.createEmpty(),
@@ -39,7 +39,7 @@ class Login extends Component {
       ris_ReportTemplateId: '',
 
       reportId: '',
-      value: 'ÁDSADSAD',
+      value: '',
     };
     this.getMauBaCao = this.getMauBaCao.bind(this);
     this.submitReport = this.submitReport.bind(this);
@@ -48,8 +48,9 @@ class Login extends Component {
     this.updateInternDoctor = this.updateInternDoctor.bind(this);
     this.updateOperationTech = this.updateOperationTech.bind(this);
 
-    this.getMauBaCao();
+    this.getMauBaCao(props);
   }
+
   handleChange(value) {
     this.setState({ selectedOption: value });
     var data = this.state.reportTemplate.filter(
@@ -450,8 +451,8 @@ class Login extends Component {
     )
       .then(response => {
         const statusCode = response.status;
-        if (statusCode === 403) {
-          return Promise.all([statusCode, '']);
+        if ((statusCode === 403) | (statusCode === 404)) {
+          return Promise.all([statusCode, response.statusText]);
         } else {
           const data = response.json();
           return Promise.all([statusCode, data]);
@@ -472,6 +473,14 @@ class Login extends Component {
           win.setTimeout(() => {
             win.print();
           }, 1000);
+        } else {
+          servicesManager.services.UINotificationService.show({
+            title: 'Thông báo',
+            message:
+              'Không tìm  thấy thông tin bệnh nhân, Không thể in báo cáo',
+            type: 'error',
+            autoClose: false,
+          });
         }
       });
   };
@@ -498,7 +507,7 @@ class Login extends Component {
       })
       .then(
         ([res, data]) => {
-          if (res === 200) {
+          if (res >= 200 && res <= 300) {
             servicesManager.services.UINotificationService.show({
               title: 'Thông báo',
               message: 'Xác nhận báo cáo chuẩn đoán thành công',
@@ -549,8 +558,8 @@ class Login extends Component {
     })
       .then(response => {
         const statusCode = response.status;
-        if (statusCode === 403) {
-          return Promise.all([statusCode, '']);
+        if ((statusCode === 403) | (statusCode === 404)) {
+          return Promise.all([statusCode, response.statusText]);
         } else {
           const data = response.json();
           return Promise.all([statusCode, data]);
@@ -580,13 +589,20 @@ class Login extends Component {
                 recommend: n.Recommend,
               });
           });
+        } else {
+          servicesManager.services.UINotificationService.show({
+            title: 'Thông báo',
+            message: 'Không tìm  thấy thông tin bệnh nhân',
+            type: 'error',
+            autoClose: false,
+          });
         }
       });
   };
   getMauBaCao = async event => {
+    var uid = event.studies[0].StudyInstanceUID;
     await fetch(
-      this.state.api +
-        '/GetDiagnosticReportByStudyUID?studyUID=31853.18033156.190820094005929864',
+      this.state.api + '/GetDiagnosticReportByStudyUID?studyUID=' + uid,
       {
         method: 'GET',
         headers: {
@@ -597,8 +613,8 @@ class Login extends Component {
     )
       .then(response => {
         const statusCode = response.status;
-        if (statusCode === 403) {
-          return Promise.all([statusCode, '']);
+        if ((statusCode === 403) | (statusCode === 404)) {
+          return Promise.all([statusCode, response.statusText]);
         } else {
           const data = response.json();
           return Promise.all([statusCode, data]);
@@ -645,6 +661,13 @@ class Login extends Component {
             }
           }
           await this.GetReportTemplate(data.ServiceId);
+        } else {
+          servicesManager.services.UINotificationService.show({
+            title: 'Thông báo',
+            message: 'Không tìm  thấy thông tin bệnh nhân',
+            type: 'error',
+            autoClose: false,
+          });
         }
       });
   };

@@ -25,7 +25,7 @@ const panelModule = {
     {
       id: 'report',
       icon: 'report',
-      label: 'report',
+      label: 'Báo cáo',
       target: 'target-component-id',
     },
   ],
@@ -33,7 +33,7 @@ const panelModule = {
     {
       from: 'right',
       icon: 'report',
-      label: 'report',
+      label: 'Báo cáo',
       target: 'target-component-id',
     },
   ],
@@ -49,7 +49,7 @@ const panelModule = {
 };
 const toolBarModules = {
   definitions: [
-    { id: 'report', icon: 'report', label: 'report', target: 'segment-panel' },
+    { id: 'report', icon: 'report', label: 'Báo cáo', target: 'segment-panel' },
   ],
   components: [
     {

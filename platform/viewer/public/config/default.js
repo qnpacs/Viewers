@@ -18,7 +18,7 @@ window.config = {
         supportsFuzzyMatching: true,
         contentType: 'application/dicom',
         transferSyntax: '*',
-        apiUrl: '',
+        apiUrl: 'http://192.168.1.200:8081/api/DiagnosticReport/',
       },
     ],
   },
