@@ -55,3 +55,23 @@
 .lableColor {
   color: white;
 }
+
+.print-source {
+  display: none;
+  background-color: white;
+}
+
+body > .print-source {
+  display: block;
+  background-color: white;
+}
+
+@media print {
+  .print-source {
+    display: block;
+    background-color: white;
+  }
+}
+.FlexboxLayout {
+  height: calc(100% - var(--toolbar-height)) !important;
+}

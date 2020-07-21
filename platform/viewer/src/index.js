@@ -31,6 +31,7 @@ import OHIFDicomMicroscopyExtension from '@ohif/extension-dicom-microscopy';
 import OHIFDicomPDFExtension from '@ohif/extension-dicom-pdf';
 // import OHIFReportExtension from '@ohif/extension-report';
 import OHIFDicomP10DownloaderExtension from '@ohif/extension-dicom-p10-downloader';
+// import OHIFLesionTrackerExtension from '@ohif/extension-lesion-tracker';
 
 /*
  * Default Settings

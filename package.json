@@ -41,8 +41,12 @@
   "dependencies": {
     "@babel/runtime": "^7.5.5",
     "core-js": "^3.2.1",
-    "jodit-react": "^1.0.48",
-    "react-spinners": "^0.9.0"
+    "create-react-class": "^15.6.3",
+    "react-select": "^3.1.0",
+    "react-draft-wysiwyg": "^1.14.5",
+    "draft-js": "^0.11.6",
+    "html-to-draftjs": "^1.5.0",
+    "draftjs-to-html": "^0.9.1"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",
